@@ -4,7 +4,7 @@ require 'clockwork'
 
 include Clockwork
 
-last_recieved = Time.now.utc - 3600
+fetched_rss_list = []
 
 handler do |job|
   begin
@@ -30,8 +30,8 @@ handler do |job|
     end.sort_by(&:last_updated)
 
     entry_list.each do |entry|
-      next if entry.last_updated.utc <= last_recieved
-      last_recieved = entry.last_updated.utc
+      next if fetched_rss_list.include?(entry.url)
+      fetched_rss_list << entry.url
 
       case
       when secret
