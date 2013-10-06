@@ -5,6 +5,7 @@ require 'clockwork'
 include Clockwork
 
 fetched_rss_list = []
+is_startup = true
 
 handler do |job|
   begin
@@ -34,12 +35,16 @@ handler do |job|
       fetched_rss_list << entry.url
 
       case
+      when is_startup
+        # do nothing
       when secret
         ImKayac.to(username).handler(entry.url).secret(secret).post(entry.title)
       when password
         ImKayac.to(username).handler(entry.url).password(password).post(entry.title)
       end
     end
+
+    is_startup = false
   rescue Exception => e
     puts e.inspect
     e.backtrace.each do |line|
