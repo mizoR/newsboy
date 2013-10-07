@@ -11,7 +11,7 @@ handler do |job|
   begin
     puts "Running #{job}"
 
-    rss_urls = ENV['RSS_URLS'] ? ENV['RSS_URLS'].split : []
+    rss_urls = ENV.select {|k, v| k =~ /^RSS_URL_/}.values
     username = ENV['IM_KAYAC_USERNAME']
     password = ENV['IM_KAYAC_PASSWORD']
     secret   = ENV['IM_KAYAC_SECRET']
@@ -26,8 +26,9 @@ handler do |job|
     end
 
     entry_list = rss_urls.reduce([]) do |entries, rss_url|
-      feed = FeedNormalizer::FeedNormalizer.parse open(rss_url)
-      entries + feed.entries
+      puts "Fetching #{rss_url}"
+      feed = FeedNormalizer::FeedNormalizer.parse open(rss_url) rescue nil
+      feed ? (entries + feed.entries) : entries
     end.sort_by(&:last_updated)
 
     entry_list.each do |entry|
